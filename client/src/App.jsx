@@ -21,22 +21,25 @@ import AllCollections from './components/collections/AllCollections';
 import ExpandedCollection from './components/collections/ExpandedCollection';
 import SavedCollections from './components/collections/SavedCollections';
 import AddCollection from './components/collections/AddCollection';
+import MyCollections from './components/collections/MyCollections';
 
 import './App.css';
 
 const App = () => {
   const [loggedInUser, setLoggedInUser] = useState('');
+  const [username, setUser] = useState('');
   const [timerId, setTimerId] = useState('');
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const [darkMode, setDarkMode] = useState(true);
 
   const theme = React.useMemo(
-    () => createMuiTheme({
-      palette: {
-        type: darkMode ? 'dark' : 'light',
-      },
-    }),
-    [darkMode],
+    () =>
+      createMuiTheme({
+        palette: {
+          type: darkMode ? 'dark' : 'light',
+        },
+      }),
+    [darkMode]
   );
 
   useEffect(() => {
@@ -62,11 +65,27 @@ const App = () => {
       });
   }, []);
 
+  useEffect(() => {
+    if (loggedInUser) {
+      fetch(`/api/user/profile?_id=${loggedInUser}`)
+        .then((res) => res.json())
+        .then((result) => {
+          setUser(result.username);
+        });
+    }
+  });
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Nav loggedInUser={loggedInUser} setLoggedInUser={setLoggedInUser} timerId={timerId} setTimerId={setTimerId} setDarkMode={setDarkMode} darkMode={darkMode} />
+        <Nav
+          loggedInUser={loggedInUser}
+          setLoggedInUser={setLoggedInUser}
+          timerId={timerId}
+          setTimerId={setTimerId}
+          setDarkMode={setDarkMode}
+          darkMode={darkMode}
+        />
         <main className="main">
           <Switch>
             <Route path="/register">
@@ -74,16 +93,24 @@ const App = () => {
             </Route>
 
             <Route path="/login">
-              <Login setLoggedInUser={setLoggedInUser} setTimerId={setTimerId} timerId={timerId} />
+              <Login
+                setLoggedInUser={setLoggedInUser}
+                setTimerId={setTimerId}
+                timerId={timerId}
+              />
             </Route>
 
             <Route path="/profile">
               {/* To protect a route, simply wrap it with a WithAuth component */}
-              <WithAuth setLoggedInUser={setLoggedInUser} Component={Profile} loggedInUser={loggedInUser} />
+              <WithAuth
+                setLoggedInUser={setLoggedInUser}
+                Component={Profile}
+                loggedInUser={loggedInUser}
+              />
             </Route>
 
-            <Route path="/collections/user/:userId">
-              <AllCollections userCollections loggedInUser={loggedInUser} />
+            <Route path="/mycollections">
+              <MyCollections loggedInUser={loggedInUser} username={username} />
             </Route>
 
             <Route path="/collections/:id">
@@ -91,12 +118,20 @@ const App = () => {
             </Route>
 
             <Route path="/savedcollections">
-              <WithAuth setLoggedInUser={setLoggedInUser} Component={SavedCollections} loggedInUser={loggedInUser} />
+              <WithAuth
+                setLoggedInUser={setLoggedInUser}
+                Component={SavedCollections}
+                loggedInUser={loggedInUser}
+              />
             </Route>
 
             <Route path="/addcollection">
               {/* <AddCollection loggedInUser={loggedInUser} /> */}
-              <WithAuth setLoggedInUser={setLoggedInUser} Component={AddCollection} loggedInUser={loggedInUser} />
+              <AddCollection
+                setLoggedInUser={setLoggedInUser}
+                Component={AddCollection}
+                loggedInUser={loggedInUser}
+              />
             </Route>
 
             <Route path="/" exact>
@@ -110,7 +145,6 @@ const App = () => {
         </main>
       </Router>
     </ThemeProvider>
-
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
 
 import './AddCollection.css';
@@ -10,7 +10,7 @@ const AddCollection = (props) => {
   const [redirect, setRedirect] = useState(false);
   const [result, setResult] = useState(null);
   const [formData, setFormData] = useState({
-    author: props.loggedInUser,
+    author: '',
     title: '',
     description: '',
     hidden: false,
@@ -87,6 +87,17 @@ const AddCollection = (props) => {
         setResult('error');
       });
   };
+
+  useEffect(() => {
+    fetch(`/api/user/profile?_id=${props.loggedInUser}`)
+      .then((res) => res.json())
+      .then((result) => {
+        setFormData({
+          ...formData,
+          author: result.username,
+        });
+      });
+  }, []);
 
   return (
     <div>

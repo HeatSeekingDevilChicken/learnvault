@@ -436,11 +436,11 @@ router.put('/tags/:id', async (req, res) => {
 // @desc    Get a collection by userId
 // @access  Public
 
-router.get('/user/:id', async (req, res) => {
-  const userId = req.params.id;
+router.get('/user/:username', async (req, res) => {
+  const username = req.params.username;
 
   try {
-    const collections = await Collection.find({ author: userId }).sort({
+    const collections = await Collection.find({ author: username }).sort({
       date: -1,
     });
     res.json(collections);
