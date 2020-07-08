@@ -1,10 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
+import clsx from 'clsx';
+import {
+  TextField,
+  Button,
+  InputLabel,
+  InputAdornment,
+  IconButton,
+  OutlinedInput,
+  FormControl,
+  makeStyles,
+} from '@material-ui/core';
+import AddBoxIcon from '@material-ui/icons/AddBox';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import { Visibility, VisibilityOff } from '@material-ui/icons';
 
 import './AddCollection.css';
 import ResultAlert from '../ResultAlert';
 
-const AddCollection = (props) => {
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+  margin: {
+    margin: theme.spacing(1),
+  },
+  formControl: {
+    margin: theme.spacing(3),
+  },
+  withoutLabel: {
+    marginTop: theme.spacing(3),
+  },
+  textField: {
+    width: '40ch',
+  },
+}));
+
+const AddCollection = ({ loggedInUser }) => {
+  const classes = useStyles();
   const linkField = { link: '' };
 
   const [redirect, setRedirect] = useState(false);
@@ -20,6 +55,29 @@ const AddCollection = (props) => {
     tags: '',
     links: '',
   });
+
+  const {
+    author,
+    title,
+    description,
+    hidden,
+    contributors,
+    text,
+    category,
+    tags,
+    links,
+    id,
+  } = formData;
+
+  const [checked, setChecked] = React.useState(false);
+
+  const handleChange = (event) => {
+    setChecked(event.target.checked);
+    setFormData({
+      ...formData,
+      hidden: checked,
+    });
+  };
 
   // this is for link input fields
   const [linkInput, setLinkInput] = useState([{ ...linkField }]);
@@ -43,19 +101,6 @@ const AddCollection = (props) => {
     }
   };
 
-  const {
-    author,
-    title,
-    description,
-    hidden,
-    contributors,
-    text,
-    category,
-    tags,
-    links,
-    id,
-  } = formData;
-
   const addCollection = (e) => {
     e.preventDefault();
     const temp = [];
@@ -76,20 +121,30 @@ const AddCollection = (props) => {
       .then((response) => response.json())
       .then((data) => {
         if (data) {
-          console.log('AddCollection successful!');
+          if (
+            process.env.NODE_ENV === 'development' ||
+            process.env.NODE_ENV === 'test'
+          ) {
+            console.log('AddCollection successful!');
+            console.log('result? ', result);
+          }
           setResult('success');
-          console.log('result? ', result);
           setTimeout(() => setRedirect(true), 2000);
         }
       })
       .catch((err) => {
-        console.log(err);
+        if (
+          process.env.NODE_ENV === 'development' ||
+          process.env.NODE_ENV === 'test'
+        ) {
+          console.log(err);
+        }
         setResult('error');
       });
   };
 
   useEffect(() => {
-    fetch(`/api/user/profile?_id=${props.loggedInUser}`)
+    fetch(`/api/user/profile?_id=${loggedInUser}`)
       .then((res) => res.json())
       .then((result) => {
         setFormData({
@@ -106,121 +161,131 @@ const AddCollection = (props) => {
       <div className="addCollection">
         <h1>Add New Collection</h1>
         <form>
-          {/* <label>
-            Author:
-            <span className="label-note">(Required)</span>
-            <input
-              type="text"
-              name="author"
-              required
-              onChange={(e) => updateForm(e)}
-              value={author}
-            />
-          </label> */}
           <br />
-          <label>
-            Title:
-            <span className="label-note">(Required)</span>
-            <input
-              type="text"
+          <FormControl
+            className={clsx(classes.margin, classes.textField)}
+            variant="outlined"
+          >
+            <TextField
+              id="outlined-required-title"
               name="title"
-              required
+              label="Title"
+              variant="outlined"
               onChange={(e) => updateForm(e)}
-              value={title}
             />
-          </label>
+          </FormControl>
           <br />
-          <label>
-            Description:
-            <span className="label-note">(Required)</span>
-            <input
-              type="text"
+          <FormControl
+            className={clsx(classes.margin, classes.textField)}
+            variant="outlined"
+          >
+            <TextField
+              id="outlined-required-description"
               name="description"
-              required
+              label="Description"
+              variant="outlined"
               onChange={(e) => updateForm(e)}
-              value={description}
             />
-          </label>
+          </FormControl>
           <br />
-          <label>
-            Hidden:
-            <input
-              type="checkbox"
-              name="hidden"
-              onChange={(e) => updateForm(e)}
-              value={hidden}
+          <FormControl className={clsx(classes.margin)}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={checked}
+                  onChange={handleChange}
+                  name="hidden"
+                  color="primary"
+                />
+              }
+              label="Hidden"
             />
-          </label>
+          </FormControl>
           <br />
-          <label>
-            Contributors:
-            <input
-              type="text"
+          <FormControl
+            className={clsx(classes.margin, classes.textField)}
+            variant="outlined"
+          >
+            <TextField
+              id="outlined-required-contributors"
               name="contributors"
+              label="Contributors"
+              variant="outlined"
               onChange={(e) => updateForm(e)}
-              value={contributors}
             />
-          </label>
+          </FormControl>
           <br />
-          <label>
-            Text:
-            <input
-              type="text"
+          <FormControl
+            className={clsx(classes.margin, classes.textField)}
+            variant="outlined"
+          >
+            <TextField
+              id="outlined-required-text"
               name="text"
+              label="Text"
+              variant="outlined"
               onChange={(e) => updateForm(e)}
-              value={text}
             />
-          </label>
+          </FormControl>
           <br />
-          <label>
-            Category:
-            <input
-              type="text"
+          <FormControl
+            className={clsx(classes.margin, classes.textField)}
+            variant="outlined"
+          >
+            <TextField
+              id="outlined-required-category"
               name="category"
+              label="Category"
+              variant="outlined"
               onChange={(e) => updateForm(e)}
-              value={category}
             />
-          </label>
+          </FormControl>
           <br />
-          <label>
-            Tags:
-            <input
-              type="text"
+          <FormControl
+            className={clsx(classes.margin, classes.textField)}
+            variant="outlined"
+          >
+            <TextField
+              id="outlined-required-tags"
               name="tags"
+              label="Tags"
+              variant="outlined"
               onChange={(e) => updateForm(e)}
-              value={tags}
             />
-          </label>
+          </FormControl>
           <br />
           {linkInput.map((val, idx) => {
             const link = `link-${idx}`;
             return (
               <div key={`link-${idx}`}>
-                <label>
-                  Link:
-                  <input
-                    type="text"
+                <FormControl
+                  className={clsx(classes.margin, classes.textField)}
+                  variant="outlined"
+                >
+                  <TextField
+                    id={`outlined-required-link-${idx}`}
                     name={link}
-                    id={link}
+                    label="Link"
+                    variant="outlined"
                     onChange={(e) => updateForm(e)}
                   />
-                </label>
-                <button
-                  type="button"
-                  id="add-link"
-                  onClick={() => {
-                    addLinkField();
-                  }}
+                </FormControl>
+                <IconButton
+                  color="primary"
+                  aria-label="add link"
+                  component="span"
+                  className={classes.margin}
+                  onClick={addLinkField}
                 >
-                  +
-                </button>
+                  <AddBoxIcon size="small" />
+                </IconButton>
               </div>
             );
           })}
           <br />
-          <button type="submit" onClick={addCollection}>
+          <Button onClick={addCollection} variant="contained" color="primary">
             Submit
-          </button>
+          </Button>
         </form>
       </div>
     </div>
